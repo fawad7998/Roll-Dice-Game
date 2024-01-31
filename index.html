@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Dice Game</title>
+    <style>
+      body {
+        font-family: "Arial", sans-serif;
+        background-color: #b68585;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        height: 100vh;
+        margin: 0;
+      }
+
+      .game-container {
+        background-color: #d4b6b6;
+        border-radius: 10px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        padding: 30px;
+        text-align: center;
+        display: flex;
+        align-items: center;
+        flex-direction: column;
+        width: 300px;
+      }
+
+      .player {
+        width: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 20px;
+      }
+      .btnss{
+        width: 100%;
+        display: flex;
+        justify-content: space-evenly;
+        gap: 10px;
+      }
+
+      .player span {
+        font-size: 18px;
+        font-weight: bold;
+      }
+
+      .player--active {
+        border: 2px solid #3498db;
+        padding: 10px;
+        border-radius: 4px;
+      }
+
+      #dice-display {
+        width: 100px;
+        height: 100px;
+        margin-bottom: 20px;
+      }
+
+      button {
+        padding: 5px 10px;
+        font-size: 14px;
+        cursor: pointer;
+        background-color: #3498db;
+        color: #d6c1c1;
+        border: none;
+        border-radius: 5px;
+        margin-top: 10px;
+        transition: background-color 0.3s;
+      }
+      .dice{
+        border-radius: 4px;
+      }
+
+      button:hover {
+        background-color: #2980b9;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="game-container">
+      <div class="player" id="player--0">
+        <span id="player-0">Player 1 Rolling</span>
+        <span id="score--0">0</span>
+      </div>
+
+      <div class="player" id="player--1">
+        <span id="player-1"></span>
+        <span id="score--1">0</span>
+      </div>
+
+      <img src="dice-6.png" alt="Dice" id="dice-display" class="dice" />
+      <div class="btnss">
+        <button id="roll-dice">Roll Dice</button>
+        <button id="hold-btn">Hold</button>
+        <button id="resetGame">Reset Game</button>
+      </div>
+    </div>
+
+    <script>
+      let numPlayer0 = 0;
+      let numPlayer1 = 0;
+      let activePlayer = 0; // 0 for Player 1, 1 for Player 2
+      let randomNumber;
+
+      const winningScore = 20;
+
+      function checkWin() {
+        if (numPlayer0 >= winningScore || numPlayer1 >= winningScore) {
+          const winnerId =
+            numPlayer0 >= winningScore ? "player--0" : "player--1";
+          document.getElementById(winnerId).classList.add("winner");
+          document.getElementById("dice-display").src = "/dice-6.png"; // Reset dice image
+          document.getElementById("roll-dice").disabled = true;
+          document.getElementById("hold-btn").disabled = true;
+          partyEffect(winnerId);
+        }
+      }
+
+      function partyEffect(playerId) {
+        alert(
+          `Player ${
+            parseInt(playerId.charAt(playerId.length - 1)) + 1
+          } wins! 🎉`
+        );
+        // You can add more celebration effects here
+      }
+
+      document.getElementById("player--0").classList.add("player--active");
+      document.getElementById("player-0").textContent = "Player 1 Rolling";
+
+      document.getElementById("roll-dice").addEventListener("click", () => {
+        const player0Active = document
+          .getElementById("player--0")
+          .classList.contains("player--active");
+        const player1Active = document
+          .getElementById("player--1")
+          .classList.contains("player--active");
+
+        if (player0Active || player1Active) {
+          const Randoimg = () => {
+            const diceImage = document.getElementById("dice-display");
+            randomNumber = Math.floor(Math.random() * 6) + 1;
+            diceImage.src = `./dice-${randomNumber}.png`;
+
+            if (activePlayer === 0 && player0Active) {
+              numPlayer0 += randomNumber;
+              document.getElementById("score--0").textContent = numPlayer0;
+            } else if (activePlayer === 1 && player1Active) {
+              numPlayer1 += randomNumber;
+              document.getElementById("score--1").textContent = numPlayer1;
+            }
+
+            checkWin();
+          };
+          Randoimg();
+        }
+      });
+
+      document.getElementById("hold-btn").addEventListener("click", () => {
+        document
+          .getElementById(`player--${activePlayer}`)
+          .classList.toggle("player--active");
+        activePlayer = 1 - activePlayer;
+        document
+          .getElementById(`player--${activePlayer}`)
+          .classList.toggle("player--active");
+        document.getElementById(
+          `player-${activePlayer}`
+        ).textContent = `Player ${activePlayer + 1} Rolling`;
+        document.getElementById(`player-${1 - activePlayer}`).textContent = "";
+
+        if (activePlayer === 0) {
+          document.getElementById("player-0").textContent = "Player 1 Rolling";
+        } else if (activePlayer === 1) {
+          document.getElementById("player-1").textContent = "Player 2 Rolling";
+        }
+
+        checkWin();
+      });
+
+      document.getElementById("resetGame").addEventListener("click", () => {
+        numPlayer0 = 0;
+        numPlayer1 = 0;
+        activePlayer = 0;
+
+        document.getElementById("score--0").textContent = 0;
+        document.getElementById("score--1").textContent = 0;
+
+        document.getElementById("player--0").classList.add("player--active");
+        document.getElementById("player--1").classList.remove("player--active");
+        document.getElementById("player--0").classList.remove("winner");
+        document.getElementById("player--1").classList.remove("winner");
+
+        document.getElementById("player-0").textContent = "Player 1 Rolling";
+        document.getElementById("player-1").textContent = "";
+
+        document.getElementById("dice-display").src = "/dice-6.png"; // Reset dice image
+
+        document.getElementById("roll-dice").disabled = false;
+        document.getElementById("hold-btn").disabled = false;
+      });
+    </script>
+  </body>
+</html>
